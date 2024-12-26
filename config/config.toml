@@ -1,0 +1,35 @@
+app_name = "ShopManageSystem"
+app_version = "0.1.0"
+server_port = 8888
+
+[mysql]
+username = "root"
+password = "rootroot"
+host = "localhost"
+port = 3306
+db_name = "shop_manage_system"
+
+
+[jwt]
+secret_key = "aaronlikeprogramming"
+#token过期时间，单位小时
+expiration_time = "24"
+
+[redis]
+host = "localhost"
+port = 6379
+password = ""
+db = [0, 1]
+
+[email]
+host = "smtp.163.com"
+port = 465
+user = "15664621607@163.com"
+password = "KTfcXrQuAcKjRAKz"
+from = "15664621607@163.com"
+alias = "Share-Horizon"
+
+
+
+
+

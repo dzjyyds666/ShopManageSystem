@@ -1,0 +1,10 @@
+[regions.cn-north]
+        alias_name="minio-oss"
+        accessId="admin"
+        secretKey="admin@123"
+        iamRoleid="arn:minio:iam:::role/idmp-sts"
+        region="cn-north"
+        buckets=["oss-file-dev"]
+        url="http://localhost:9000/"
+
+
