@@ -26,47 +26,54 @@ type registerInfo struct {
 	CaptchaCode string `json:"captcha_code"`
 }
 
-var passwordRegex = regexp2.MustCompile("^(a-zA-Z0-9.@_){8,12}$", regexp2.None)
+var passwordRegex = regexp2.MustCompile("^[a-zA-Z0-9.@_]{8,12}$", regexp2.None)
 
+// @Summary 注册
+// @Description 注册
+// @Tags login
+// @Accept json
+// @Produce json
+// @Param registerInfo body registerInfo true "注册信息"
+// @Router /register [post]
 func Register(ctx *gin.Context) {
 	var registerinfo registerInfo
 
 	err := ctx.ShouldBindJSON(&registerinfo)
 	if err != nil {
-		logx.GetLogger("SH").Errorf("Handler|Register|ParamsError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("Handler|Register|ParamsError|%v", err)
 		ctx.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.ParamError, "参数错误", nil))
 		return
 	}
 
 	matchString, err := passwordRegex.MatchString(registerinfo.Password)
 	if err != nil {
-		logx.GetLogger("SH").Errorf("Handler|Register|PasswordRegexError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("Handler|Register|PasswordRegexError|%v", err)
 		panic(err)
 	}
 	if matchString == false {
-		logx.GetLogger("SH").Errorf("Handler|Register|PasswordRegexError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("Handler|Register|PasswordRegexError|%v", err)
 		ctx.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.ParamError, "密码包含字母数字，特殊字符（.、_、@）", nil))
 		return
 	}
 
 	get := database.RDB[0].Get(ctx, fmt.Sprintf(database.Redis_Captcha_Key, registerinfo.CaptchaId))
 	if get.Err() != nil {
-		logx.GetLogger("SH").Errorf("Handler|Register|GetCaptchaError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("Handler|Register|GetCaptchaError|%v", err)
 		panic(get.Err())
 	}
 	if get.Val() != registerinfo.CaptchaCode {
-		logx.GetLogger("SH").Errorf("Handler|Register|CaptchaNotMatch")
+		logx.GetLogger("ShopManage").Errorf("Handler|Register|CaptchaNotMatch")
 		ctx.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.ParamError, "图片验证码错误", nil))
 		return
 	}
 
-	get = database.RDB[0].Get(ctx, fmt.Sprintf(database.Redis_Register_Verify_Key, registerinfo.Email))
+	get = database.RDB[0].Get(ctx, fmt.Sprintf(database.Redis_Verification_Code_Key, registerinfo.Email))
 	if get.Err() != nil {
-		logx.GetLogger("SH").Errorf("Handler|Register|GetVerifyCodeError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("Handler|Register|GetVerifyCodeError|%v", err)
 		panic(get.Err())
 	}
 	if get.Val() != registerinfo.VerifyCode {
-		logx.GetLogger("SH").Errorf("Handler|Register|VerifyCodeNotMatch")
+		logx.GetLogger("ShopManage").Errorf("Handler|Register|VerifyCodeNotMatch")
 		ctx.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.ParamError, "邮箱验证码错误", nil))
 		return
 	}
@@ -74,7 +81,7 @@ func Register(ctx *gin.Context) {
 	var userInfo models.UserInfo
 	newUUID, err := uuid.NewUUID()
 	if err != nil {
-		logx.GetLogger("SH").Errorf("Handler|Register|NewUUIDError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("Handler|Register|NewUUIDError|%v", err)
 		panic(err)
 	}
 
@@ -86,8 +93,9 @@ func Register(ctx *gin.Context) {
 
 	err = database.MyDB.Create(&userInfo).Error
 	if err != nil {
-		logx.GetLogger("SH").Errorf("Handler|Register|CreateUserError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("Handler|Register|CreateUserError|%v", err)
 		ctx.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.RequestFail, "注册失败", err))
+		ctx.Abort()
 	}
 
 	ctx.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.RequestSuccess, "注册成功", models.UserInfo{
@@ -97,7 +105,11 @@ func Register(ctx *gin.Context) {
 
 }
 
-// 获取图形验证码
+// @Summary 获取图形验证码
+// @Description 获取图形验证码
+// @Tags login
+// @Produce json
+// @Router /getCaptcha [get]
 func GetCaptchaCode(ctx *gin.Context) {
 	driver := base64Captcha.NewDriverDigit(80, 200, 5, 0.8, 75)
 	store := base64Captcha.DefaultMemStore
@@ -123,7 +135,13 @@ func GetCaptchaCode(ctx *gin.Context) {
 	}))
 }
 
-// 发送注册验证码
+// @Summary 发送注册验证码
+// @Description 发送注册验证码
+// @Tags login
+// @Accept json
+// @Produce json
+// @Param email query string true "邮箱"
+// @Router /sendVerfiyCode [get]
 func SendVerifyCode(ctx *gin.Context) {
 
 	to := ctx.Query("email")

@@ -45,7 +45,7 @@ func init() {
 			S3config.WithBaseEndpoint(regionConfig.Endpoint),
 		)
 		if err != nil {
-			logx.GetLogger("SH").Errorf("Config|InitS3Config|CreateClientError|%v", err)
+			logx.GetLogger("ShopManage").Errorf("Config|InitS3Config|CreateClientError|%v", err)
 			os.Exit(1)
 		}
 
@@ -58,33 +58,33 @@ func init() {
 			// 判断bucket是否存在,不存在就创建
 			bucketErr := exitOrCreateBucket(S3GlobalConfig[i].S3Client, bucket, regionConfig.Region)
 			if bucketErr != nil {
-				logx.GetLogger("SH").Errorf("Config|InitS3Config|CreateBucketError|%v", bucketErr)
+				logx.GetLogger("ShopManage").Errorf("Config|InitS3Config|CreateBucketError|%v", bucketErr)
 				os.Exit(1)
 			}
 		}
 	}
-	logx.GetLogger("SH").Infof("S3Config:%v", S3GlobalConfig)
-	logx.GetLogger("SH").Info("Config|InitS3Config|SUCC")
+	logx.GetLogger("ShopManage").Infof("S3Config:%v", S3GlobalConfig)
+	logx.GetLogger("ShopManage").Info("Config|InitS3Config|SUCC")
 }
 
 func LoadS3Config(filePath string) []S3RegionConfig {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		logx.GetLogger("SH").Errorf("Config|LoadS3Config|ReadError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("Config|LoadS3Config|ReadError|%v", err)
 		os.Exit(1)
 	}
 
 	// 解析TOML格式的配置文件
 	var rawConfig map[string]interface{}
 	if err = toml.Unmarshal(data, &rawConfig); err != nil {
-		logx.GetLogger("SH").Errorf("Config|LoadS3Config|UnmarshalError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("Config|LoadS3Config|UnmarshalError|%v", err)
 		os.Exit(1)
 	}
 
 	// 获取所有区域的配置
 	regionsMap, ok := rawConfig["regions"].(map[string]interface{})
 	if !ok {
-		logx.GetLogger("SH").Errorf("Config|LoadS3Config|InvalidConfig|%v", err)
+		logx.GetLogger("ShopManage").Errorf("Config|LoadS3Config|InvalidConfig|%v", err)
 		os.Exit(1)
 	}
 
@@ -115,7 +115,7 @@ func exitOrCreateBucket(S3Client *s3.Client, bucket, region string) error {
 			ACL: types.BucketCannedACLPublicRead,
 		})
 		if createrr != nil {
-			logx.GetLogger("SH").Errorf("Bucket|CreateBucket|Error|%v", createrr)
+			logx.GetLogger("ShopManage").Errorf("Bucket|CreateBucket|Error|%v", createrr)
 			return createrr
 		} else {
 			return nil

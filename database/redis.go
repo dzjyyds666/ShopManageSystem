@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-// 全局redis客户端
+// todo 单例模式 全局redis客户端
 var RDB []*redis.Client
 
 const (
@@ -17,9 +17,10 @@ const (
 	Redis_Captcha_Key           = "captcha:%s"
 	Redis_Verification_Code_Key = "verification_code:%s"
 	Redis_Register_Verify_Key   = "register_verify:%s"
-	Redis_Applay_Upload_Fid     = "upload_fid:%s"
 
-	Redis_Multipart_Upload_Key = "MultipartUpload:%s:%s"
+	Redis_GoodS_Stock_Key    = "goods_stock:%s"
+	Redis_User_Order_Key     = "user_order:%s"
+	Redis_Discount_Goods_Key = "discount_goods_ids"
 )
 
 // 初始化redis客户端

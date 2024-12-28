@@ -71,10 +71,10 @@ func init() {
 	// 读取配置文件
 	err := LoggingConfig()
 	if err != nil {
-		logx.GetLogger("SH").Errorf("Config|InitConfig|FAIL|%v", err)
+		logx.GetLogger("ShopManage").Errorf("Config|InitConfig|FAIL|%v", err)
 		os.Exit(1)
 	}
-	logx.GetLogger("SH").Info("Config|InitConfig|SUCC")
+	logx.GetLogger("ShopManage").Info("Config|InitConfig|SUCC")
 }
 
 func LoggingConfig() error {
@@ -87,14 +87,14 @@ func LoggingConfig() error {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		logx.GetLogger("SH").Errorf("Config|LoggingConfig|ReadError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("Config|LoggingConfig|ReadError|%v", err)
 		return err
 	}
 
 	// 将配置文件绑定结构体
 	err = viper.Unmarshal(&GlobalConfig)
 	if err != nil {
-		logx.GetLogger("SH").Errorf("Config|LoggingConfig|JsonUnmarshalError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("Config|LoggingConfig|JsonUnmarshalError|%v", err)
 		return err
 	}
 	return nil

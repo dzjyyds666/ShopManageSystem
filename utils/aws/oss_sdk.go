@@ -51,7 +51,7 @@ func (ui *UploadInfo) WithFid(fid string) *UploadInfo {
 	if fid != "" {
 		ui.Fid = fid
 	} else {
-		logx.GetLogger("SH").Error("OSS-sdk|fid can not be empty")
+		logx.GetLogger("ShopManage").Error("OSS-sdk|fid can not be empty")
 	}
 	return ui
 }
@@ -60,7 +60,7 @@ func (ui *UploadInfo) WithContentLength(contentLength int64) *UploadInfo {
 	if contentLength != 0 {
 		ui.ContentLength = contentLength
 	} else {
-		logx.GetLogger("SH").Error("OSS-sdk|contentLength can not be 0")
+		logx.GetLogger("ShopManage").Error("OSS-sdk|contentLength can not be 0")
 	}
 	return ui
 }
@@ -69,7 +69,7 @@ func (ui *UploadInfo) WithContentMd5(contentMd5 string) *UploadInfo {
 	if contentMd5 != "" {
 		ui.ContentMd5 = contentMd5
 	} else {
-		logx.GetLogger("SH").Error("OSS-sdk|contentMd5 can not be empty")
+		logx.GetLogger("ShopManage").Error("OSS-sdk|contentMd5 can not be empty")
 	}
 	return ui
 }
@@ -78,7 +78,7 @@ func (ui *UploadInfo) WithContentType(contentType string) *UploadInfo {
 	if contentType != "" {
 		ui.ContentType = contentType
 	} else {
-		logx.GetLogger("SH").Error("OSS-sdk|contentType can not be empty")
+		logx.GetLogger("ShopManage").Error("OSS-sdk|contentType can not be empty")
 	}
 	return ui
 }
@@ -87,7 +87,7 @@ func (ui *UploadInfo) WithFilename(filename string) *UploadInfo {
 	if filename != "" {
 		ui.FileName = filename
 	} else {
-		logx.GetLogger("SH").Error("OSS-sdk|filename can not be empty")
+		logx.GetLogger("ShopManage").Error("OSS-sdk|filename can not be empty")
 	}
 	return ui
 }
@@ -96,7 +96,7 @@ func GetUploadInfoFromStream(reader io.ReadSeeker, fileName string) (*UploadInfo
 	head := make([]byte, 512)
 	_, err := reader.Read(head)
 	if err != nil {
-		logx.GetLogger("SH").Errorf("OSS-sdk|ReadHeadError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("OSS-sdk|ReadHeadError|%v", err)
 		return nil, err
 	}
 	contentType := mimetype.Detect(head)
@@ -108,7 +108,7 @@ func GetUploadInfoFromStream(reader io.ReadSeeker, fileName string) (*UploadInfo
 	for {
 		n, err := reader.Read(buffer)
 		if err != nil && err != io.EOF {
-			logx.GetLogger("SH").Errorf("OSS-sdk|GetContentType|ReadFileError|%v", err)
+			logx.GetLogger("ShopManage").Errorf("OSS-sdk|GetContentType|ReadFileError|%v", err)
 			return nil, err
 		}
 		if n == 0 {
@@ -117,7 +117,7 @@ func GetUploadInfoFromStream(reader io.ReadSeeker, fileName string) (*UploadInfo
 		contentLength += int64(n)
 		_, err = hash.Write(buffer[0:n])
 		if err != nil {
-			logx.GetLogger("SH").Errorf("OSS-sdk|GetContentMd5|WriteHashError|%v", err)
+			logx.GetLogger("ShopManage").Errorf("OSS-sdk|GetContentMd5|WriteHashError|%v", err)
 			return nil, err
 		}
 	}
@@ -137,7 +137,7 @@ func GetUploadInfoFromLocal(path string) (*UploadInfo, error) {
 	file, err := os.Open(path)
 	defer file.Close()
 	if err != nil {
-		logx.GetLogger("SH").Errorf("OSS-sdk|OpenFileError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("OSS-sdk|OpenFileError|%v", err)
 		return nil, err
 	}
 	stat, _ := file.Stat()
@@ -148,7 +148,7 @@ func GetUploadInfoFromLocal(path string) (*UploadInfo, error) {
 	bytes := make([]byte, 512)
 	_, err = io.ReadFull(file, bytes)
 	if err != nil && err != io.EOF {
-		logx.GetLogger("SH").Errorf("OSS-sdk|GetContentType|ReadFileError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("OSS-sdk|GetContentType|ReadFileError|%v", err)
 		return nil, err
 	}
 
@@ -157,7 +157,7 @@ func GetUploadInfoFromLocal(path string) (*UploadInfo, error) {
 
 	// 重置文件指针到文件开头
 	if _, err := file.Seek(0, io.SeekStart); err != nil {
-		logx.GetLogger("SH").Errorf("OSS-sdk|SeekFileError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("OSS-sdk|SeekFileError|%v", err)
 		return nil, err
 	}
 
@@ -166,7 +166,7 @@ func GetUploadInfoFromLocal(path string) (*UploadInfo, error) {
 	for {
 		n, err := file.Read(buffer)
 		if err != nil && err != io.EOF {
-			logx.GetLogger("SH").Errorf("OSS-sdk|GetContentMd5|ReadFileError|%v", err)
+			logx.GetLogger("ShopManage").Errorf("OSS-sdk|GetContentMd5|ReadFileError|%v", err)
 			return nil, err
 		}
 		if n == 0 {
@@ -174,7 +174,7 @@ func GetUploadInfoFromLocal(path string) (*UploadInfo, error) {
 		}
 		_, err = hash.Write(buffer[0:n])
 		if err != nil {
-			logx.GetLogger("SH").Errorf("OSS-sdk|GetContentMd5|WriteHashError|%v", err)
+			logx.GetLogger("ShopManage").Errorf("OSS-sdk|GetContentMd5|WriteHashError|%v", err)
 			return nil, err
 		}
 	}
@@ -197,12 +197,12 @@ func PutFile(uploadInfo *UploadInfo, reader io.Reader, aliasName, bucket string)
 
 	S3Config, err2 := GetS3Client(aliasName)
 	if err2 != nil {
-		logx.GetLogger("SH").Errorf("OSS-sdk|GetS3Client|%v", err2)
+		logx.GetLogger("ShopManage").Errorf("OSS-sdk|GetS3Client|%v", err2)
 		return false, err2
 	}
 
 	if !bucketIsExist(bucket, S3Config.Buckets) {
-		logx.GetLogger("SH").Infof("Config|LoadS3Config|BucketNotExist|%s", bucket)
+		logx.GetLogger("ShopManage").Infof("Config|LoadS3Config|BucketNotExist|%s", bucket)
 		return false, AwsErrorEnum.BucketNotExist
 	}
 
@@ -221,7 +221,7 @@ func PutFile(uploadInfo *UploadInfo, reader io.Reader, aliasName, bucket string)
 	})
 
 	if err != nil {
-		logx.GetLogger("SH").Errorf("OSS-sdk|PutObjectError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("OSS-sdk|PutObjectError|%v", err)
 		return false, AwsErrorEnum.PutObjetFail
 	}
 	return true, nil
@@ -252,7 +252,7 @@ func InitMultUpload(bucket string, client *s3.Client, uploadInfo UploadInfo) (*s
 
 	ouput, err := client.CreateMultipartUpload(context.TODO(), multipartUploadInput)
 	if err != nil {
-		logx.GetLogger("SH").Errorf("OSS-sdk|CreateMultipartUpload|%v", err)
+		logx.GetLogger("ShopManage").Errorf("OSS-sdk|CreateMultipartUpload|%v", err)
 		return nil, err
 	}
 
@@ -270,11 +270,11 @@ func MultipartUpload(uploadInfo MultipartUploadInfo, r io.Reader, client *s3.Cli
 		ContentLength: aws.Int64(uploadInfo.ContentLenght),
 	})
 	if err != nil {
-		logx.GetLogger("SH").Errorf("OSS-sdk|UploadPart|%v", err)
+		logx.GetLogger("ShopManage").Errorf("OSS-sdk|UploadPart|%v", err)
 		return "", uploadInfo.PartNumber, err
 	}
 
-	logx.GetLogger("SH").Infof("OSS-sdk|UploadPart:%v|SUCC", uploadInfo.PartNumber)
+	logx.GetLogger("ShopManage").Infof("OSS-sdk|UploadPart:%v|SUCC", uploadInfo.PartNumber)
 	return aws.ToString(part.ETag), uploadInfo.PartNumber, nil
 }
 
@@ -294,7 +294,7 @@ func CompleteMultipartUpload(completedParts []*types.CompletedPart, client *s3.C
 		},
 	})
 	if err != nil {
-		logx.GetLogger("SH").Errorf("OSS-sdk|CompleteMultipartUpload|%v", err)
+		logx.GetLogger("ShopManage").Errorf("OSS-sdk|CompleteMultipartUpload|%v", err)
 		return err
 	}
 	return nil
@@ -308,7 +308,7 @@ func AbortMultipartUpload(client *s3.Client, bucket, key, uploadId string) error
 		UploadId: aws.String(uploadId),
 	})
 	if err != nil {
-		logx.GetLogger("SH").Errorf("OSS-sdk|AbortMultipartUploadError|%v", err)
+		logx.GetLogger("ShopManage").Errorf("OSS-sdk|AbortMultipartUploadError|%v", err)
 		return err
 	}
 	return nil

@@ -17,7 +17,7 @@ func TokenVerify() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")
 
-		logx.GetLogger("logx").Infof("TokenVerify|token: %v", token)
+		logx.GetLogger("ShopManage").Infof("TokenVerify|token: %v", token)
 
 		jwt := jwt.NewJWTUtils()
 

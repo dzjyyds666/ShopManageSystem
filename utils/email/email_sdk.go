@@ -13,7 +13,7 @@ func SendEmail(to string, subject string, body string) error {
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", body)
 
-	logx.GetLogger("logx").Infof("邮件配置: %v", config.GlobalConfig.Email)
+	logx.GetLogger("ShopManage").Infof("邮件配置: %v", config.GlobalConfig.Email)
 
 	d := gomail.NewDialer(
 		config.GlobalConfig.Email.Host,
@@ -22,10 +22,10 @@ func SendEmail(to string, subject string, body string) error {
 		config.GlobalConfig.Email.Password)
 
 	if err := d.DialAndSend(m); err != nil {
-		logx.GetLogger("logx").Errorf("发送邮件失败: %v", err)
+		logx.GetLogger("ShopManage").Errorf("发送邮件失败: %v", err)
 		return err
 	}
 
-	logx.GetLogger("logx").Info("发送邮件成功")
+	logx.GetLogger("ShopManage").Info("发送邮件成功")
 	return nil
 }

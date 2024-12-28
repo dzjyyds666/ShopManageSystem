@@ -39,6 +39,8 @@ var EnmuHttptatus = struct {
 	PasswordError HttpStatus // 密码错误
 
 	ArticleTypeExists HttpStatus // 文章类型已存在
+
+	PayFailed HttpStatus
 }{
 	RequestSuccess: 10200,
 	RequestFail:    10201,
@@ -56,5 +58,5 @@ var EnmuHttptatus = struct {
 	ParamError:    10601,
 	PasswordError: 10602,
 
-	ArticleTypeExists: 10701,
+	PayFailed: 10701,
 }

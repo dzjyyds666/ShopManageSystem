@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// 全局mysql客户端
+// todo 单例模式 全局mysql客户端
 var MyDB *gorm.DB
 
 func InitMySQL() {
@@ -35,7 +35,7 @@ func InitMySQL() {
 
 	logx.GetLogger("SH").Info("Database|MySqlConnect|SUCC")
 
-	err = MyDB.AutoMigrate(&models.UserInfo{}) // 创建表
+	err = MyDB.AutoMigrate(&models.UserInfo{}, &models.GoodsInfo{}, &models.GoodsType{}) // 创建表
 	if err != nil {
 		logx.GetLogger("SH").Errorf("Database|MySqlAuToMigraye|Error|%v", err)
 		os.Exit(1)

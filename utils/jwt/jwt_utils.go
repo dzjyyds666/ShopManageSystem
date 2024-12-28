@@ -51,7 +51,7 @@ func (j *JWT) ParseJWT(tokenStr string) (*Claims, error) {
 
 	tokenStr = strings.Replace(tokenStr, "Bearer ", "", 1)
 
-	logx.GetLogger("logx").Infof("ParseJWT|tokenStr: %v", tokenStr)
+	logx.GetLogger("ShopManage").Infof("ParseJWT|tokenStr: %v", tokenStr)
 
 	//解析token
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {

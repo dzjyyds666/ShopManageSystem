@@ -7,5 +7,5 @@ import (
 
 func TestLoggingConfig(t *testing.T) {
 	config := LoadS3Config("s3_config.toml")
-	logx.GetLogger("SH").Infof("Config|LoadS3Config|%v", config)
+	logx.GetLogger("ShopManage").Infof("Config|LoadS3Config|%v", config)
 }
