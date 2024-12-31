@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"net"
 	"net/http"
 )
 
@@ -65,12 +66,43 @@ func UploadFile(ctx *gin.Context) {
 		logx.GetLogger("ShopManage").Errorf("Handler|UploadFile|%v", err)
 		panic(err)
 	}
-
 	// 构建文件的URL
-	fileURL := fmt.Sprintf("%s//%s/%s/%s", "http:", endpiont, bucketName, file.Filename)
+	ip := getServerIP()
+	fileURL := fmt.Sprintf("%s//%s/%s/%s", "http:", ip+":9000", bucketName, file.Filename)
+	logx.GetLogger("ShopManage").Infof("Handler|UploadFile|%s", fileURL)
+	ctx.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.RequestSuccess, fileURL, nil))
+}
 
-	ctx.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.RequestSuccess, "上传成功", map[string]string{
-		"url": fileURL,
-	}))
+// 获取当前服务器的 IP 地址
+func getServerIP() string {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		logx.GetLogger("ShopManage").Errorf("Handler|GetServerIP|%v", err)
+		return ""
+	}
 
+	for _, iface := range ifaces {
+		addrs, err := iface.Addrs()
+		if err != nil {
+			logx.GetLogger("ShopManage").Errorf("Handler|GetServerIP|%v", err)
+			continue
+		}
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+			if ip == nil || ip.IsLoopback() {
+				continue
+			}
+			ip = ip.To4()
+			if ip != nil {
+				return ip.String()
+			}
+		}
+	}
+	return ""
 }

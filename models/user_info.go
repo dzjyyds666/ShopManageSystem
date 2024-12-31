@@ -6,7 +6,7 @@ type UserInfo struct {
 	Email    string `gorm:"column:email;size:36;not null,unique"`
 	Password string `gorm:"column:password;size:256;not null"`
 	Role     string `gorm:"column:role;size:16;not null;default:normal_user"`
-	Avatar   string `gorm:"column:avatar;size:36;not null"`
+	Avatar   string `gorm:"column:avatar;size:256;not null"`
 }
 
 func (u UserInfo) TableName() string {

@@ -61,7 +61,9 @@ func Register(ctx *gin.Context) {
 		logx.GetLogger("ShopManage").Errorf("Handler|Register|GetCaptchaError|%v", err)
 		panic(get.Err())
 	}
-	if get.Val() != registerinfo.CaptchaCode {
+	logx.GetLogger("ShopManage").Infof("图像验证码%s", get.Val())
+	logx.GetLogger("ShopManage").Infof("注册信息%s", registerinfo.CaptchaCode)
+	if get.Val() != registerinfo.VerifyCode {
 		logx.GetLogger("ShopManage").Errorf("Handler|Register|CaptchaNotMatch")
 		ctx.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.ParamError, "图片验证码错误", nil))
 		return
@@ -72,7 +74,7 @@ func Register(ctx *gin.Context) {
 		logx.GetLogger("ShopManage").Errorf("Handler|Register|GetVerifyCodeError|%v", err)
 		panic(get.Err())
 	}
-	if get.Val() != registerinfo.VerifyCode {
+	if get.Val() != registerinfo.CaptchaCode {
 		logx.GetLogger("ShopManage").Errorf("Handler|Register|VerifyCodeNotMatch")
 		ctx.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.ParamError, "邮箱验证码错误", nil))
 		return
@@ -98,11 +100,7 @@ func Register(ctx *gin.Context) {
 		ctx.Abort()
 	}
 
-	ctx.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.RequestSuccess, "注册成功", models.UserInfo{
-		Email:    userInfo.Email,
-		Password: userInfo.Password,
-	}))
-
+	ctx.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.RequestSuccess, "注册成功", nil))
 }
 
 // @Summary 获取图形验证码

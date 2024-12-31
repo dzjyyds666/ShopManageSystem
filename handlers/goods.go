@@ -28,29 +28,16 @@ const (
 // @Tags goods
 // @Accept json
 // @Produce json
-// @Param page query int true "页码"
-// @Param limit query int true "每页数量"
 // @Router /goods/list [get]
 func GetGoodsListByPage(ctx *gin.Context) {
-	page := ctx.Query("page")
-	limit := ctx.Query("limit")
-
-	pageInt, _ := strconv.Atoi(page)
-	limitInt, _ := strconv.Atoi(limit)
-
-	offset := (pageInt - 1) * limitInt
-
 	var goodsList []models.GoodsInfo
 	err := database.MyDB.Where("status = ?", models.GoodsStatus.Normal).
-		Offset(offset).
-		Limit(limitInt).
-		Select("goods_id", "name", "original_price", "real_price", "stock", "type_id", "photo").
+		Select("goods_id", "name", "price", "stock", "type_id", "photo").
 		Find(&goodsList).Error
 	if err != nil {
 		logx.GetLogger("ShopManage").Errorf("GetGoodsListByPage|MySqlError|%v", err)
 		panic(err)
 	}
-
 	ctx.JSON(200, response.NewResult(response.EnmuHttptatus.RequestSuccess, "获取商品列表成功", goodsList))
 }
 
@@ -243,71 +230,91 @@ func InitBuyGoods(ctx *gin.Context) {
 // @Param order_id path string true "订单id"
 // @Router /goods/payForOrder/{order_id} [post]
 func PayForOrder(ctx *gin.Context) {
-	orderId := ctx.Param("order_id")
-	if orderId == "" {
-		logx.GetLogger("ShopManage").Errorf("PayForOrder|ParamsError|Order Can not be null")
-		ctx.JSON(200, response.NewResult(response.EnmuHttptatus.ParamError, "订单id不可以为空", nil))
-		ctx.Abort()
-	}
+	//orderId := ctx.Param("order_id")
+	//if orderId == "" {
+	//	logx.GetLogger("ShopManage").Errorf("PayForOrder|ParamsError|Order Can not be null")
+	//	ctx.JSON(200, response.NewResult(response.EnmuHttptatus.ParamError, "订单id不可以为空", nil))
+	//	ctx.Abort()
+	//}
 
 	payType := ctx.Query("pay_type")
 
-	// 从redis中获取到订单信息
-	orderinfo, err := database.RDB[0].Get(ctx, fmt.Sprintf(database.Redis_User_Order_Key, orderId)).Result()
-	if err != nil {
-		logx.GetLogger("ShopManage").Errorf("PayForOrder|RedisError|GetOrderError|%v", err)
-		panic(err)
-	}
+	role := ctx.Query("role")
 
-	var order orderInfo
-	err = json.Unmarshal([]byte(orderinfo), &order)
-	if err != nil {
-		logx.GetLogger("ShopManage").Errorf("PayForOrder|JsonUnmarshalError|%v", err)
-		panic(err)
-	}
+	total := ctx.Query("total")
 
-	// 先判断订单是否过期
-	createTime, err := strconv.ParseInt(order.Time, 10, 64)
-	if err != nil {
-		logx.GetLogger("ShopManage").Errorf("PayForOrder|ParseIntError|%v", err)
-		panic(err)
-	}
+	price, _ := strconv.Atoi(total)
 
-	if time.Now().Unix()-createTime > Order_Expire_Time {
-		logx.GetLogger("ShopManage").Errorf("PayForOrder|OrderExpired|%v", err)
-		ctx.JSON(200, response.NewResult(response.EnmuHttptatus.ParamError, "订单已过期", nil))
-		ctx.Abort()
-	}
+	//// 从redis中获取到订单信息
+	//orderinfo, err := database.RDB[0].Get(ctx, fmt.Sprintf(database.Redis_User_Order_Key, orderId)).Result()
+	//if err != nil {
+	//	logx.GetLogger("ShopManage").Errorf("PayForOrder|RedisError|GetOrderError|%v", err)
+	//	panic(err)
+	//}
+
+	//var order orderInfo
+	//err = json.Unmarshal([]byte(orderinfo), &order)
+	//if err != nil {
+	//	logx.GetLogger("ShopManage").Errorf("PayForOrder|JsonUnmarshalError|%v", err)
+	//	panic(err)
+	//}
+
+	//// 先判断订单是否过期
+	//createTime, err := strconv.ParseInt(order.Time, 10, 64)
+	//if err != nil {
+	//	logx.GetLogger("ShopManage").Errorf("PayForOrder|ParseIntError|%v", err)
+	//	panic(err)
+	//}
+
+	//if time.Now().Unix()-createTime > Order_Expire_Time {
+	//	logx.GetLogger("ShopManage").Errorf("PayForOrder|OrderExpired|%v", err)
+	//	ctx.JSON(200, response.NewResult(response.EnmuHttptatus.ParamError, "订单已过期", nil))
+	//	ctx.Abort()
+	//}
 
 	var strategy settlement.Strategy
-	if order.Role == models.Role.NormalUser {
+	if role == models.Role.NormalUser {
 		strategy = settlement.NewNormalStrategy()
-	} else if order.Role == models.Role.VipUser {
+	} else if role == models.Role.VipUser {
 		strategy = settlement.NewVipStrategy()
 	}
 
 	// todo 策略模式计算总价格
 	var context settlement.Context
 	context.SetStrategy(strategy)
-	totalPrice := context.PubStrategy.CalculateTotal(order.Price...)
+	totalPrice := context.CalculateTotal(float64(price))
 
-	// todo 简单工厂方法模式
+	// todo 简单工厂方法模式 根据用户需求获取支付方式
 	var payclient payment.Payment
 	paymentFactoty := payment.PaymentFactory{}
 	payclient = paymentFactoty.CreatePayment(payment.PayType(payType))
-	pay, err := payclient.Pay(totalPrice)
+	message, err := payclient.Pay(totalPrice)
 	if err != nil {
-		return
-	}
-
-	if pay == false {
 		logx.GetLogger("ShopManage").Errorf("PayForOrder|PaymentError|%v", err)
 		ctx.JSON(200, response.NewResult(response.EnmuHttptatus.PayFailed, "支付失败", nil))
 		ctx.Abort()
-	} else {
-		logx.GetLogger("ShopManage").Infof("PayForOrder|PaymentSuccess")
-		ctx.JSON(200, response.NewResult(response.EnmuHttptatus.RequestSuccess, "支付成功", nil))
 	}
+
+	logx.GetLogger("ShopManage").Infof("PayForOrder|PaymentSuccess")
+	ctx.JSON(200, response.NewResult(response.EnmuHttptatus.RequestSuccess, message, map[string]string{
+		"total_price": fmt.Sprintf("%v", totalPrice),
+		"pay_type":    payType,
+	}))
+}
+
+// TODO 简单工厂模式
+func GetPayTotal(ctx *gin.Context) {
+	payType := ctx.Query("pay_type")
+	var payclient payment.Payment
+	paymentFactory := payment.PaymentFactory{}
+	payclient = paymentFactory.CreatePayment(payment.PayType(payType))
+	tal, err := payclient.GetPayToTal()
+	if err != nil {
+		ctx.JSON(200, response.NewResult(response.EnmuHttptatus.ParamError, "获取支付总额失败", nil))
+		ctx.Abort()
+	}
+
+	ctx.JSON(200, response.NewResult(response.EnmuHttptatus.RequestSuccess, tal, nil))
 }
 
 // @Summary 完成订单

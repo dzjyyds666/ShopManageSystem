@@ -17,6 +17,14 @@ func TokenVerify() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")
 
+		if len(token) <= 0 {
+			logx.GetLogger("ShopManage").Errorf("TokenVerify|token为空,请重新登录")
+			c.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.TokenInvalid, "token为空,请重新登录", nil))
+			// 阻止执行
+			c.Abort()
+			return
+		}
+
 		logx.GetLogger("ShopManage").Infof("TokenVerify|token: %v", token)
 
 		jwt := jwt.NewJWTUtils()
@@ -27,6 +35,7 @@ func TokenVerify() gin.HandlerFunc {
 			c.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.TokenInvalid, "token校验失败,请重新登录", nil))
 			// 阻止执行
 			c.Abort()
+			return
 		}
 		userId := claims.UserId
 
@@ -47,6 +56,7 @@ func TokenVerify() gin.HandlerFunc {
 			}
 			// 阻止执行
 			c.Abort()
+			return
 		}
 		c.Set("user_id", userId)
 		c.Next()

@@ -21,6 +21,11 @@ const (
 	Redis_GoodS_Stock_Key    = "goods_stock:%s"
 	Redis_User_Order_Key     = "user_order:%s"
 	Redis_Discount_Goods_Key = "discount_goods_ids"
+
+	Redis_Wechat_Pay_ToTal = "wechat_pay_total"
+	Redis_Ali_Pay_ToTal    = "ali_pay_total"
+
+	Redis_delete_type_key = "delete_type_key:%s"
 )
 
 // 初始化redis客户端

@@ -42,10 +42,10 @@ type Context struct {
 	PubStrategy Strategy
 }
 
-func (c Context) SetStrategy(strategy Strategy) {
+func (c *Context) SetStrategy(strategy Strategy) {
 	c.PubStrategy = strategy
 }
 
-func (c Context) CalculateTotal(items ...float64) float64 {
+func (c *Context) CalculateTotal(items ...float64) float64 {
 	return c.PubStrategy.CalculateTotal(items...)
 }

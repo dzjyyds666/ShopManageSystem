@@ -1,14 +1,14 @@
 package models
 
 type GoodsInfo struct {
-	GoodsId  string  `gorm:"column:goods_id;primaryKey;size:36;not null"`
-	Name     string  `gorm:"column:name;size:36;not null;unique"`
-	Photo    string  `gorm:"column:photo;size:36;not null"`
-	Price    float64 `gorm:"column:original_price;not null"` // 原价
-	Discount float32 `gorm:"column:discount;not null"`       // 折扣
-	Stock    int     `gorm:"column:stock;not null"`          // 库存
-	TypeId   string  `gorm:"column:type_id;size:36;not null"`
-	status   int     `gorm:"column:status;size:1;not null"`
+	GoodsId  string `gorm:"column:goods_id;primaryKey;size:36;not null"`
+	Name     string `gorm:"column:name;size:36;not null;unique"`
+	Photo    string `gorm:"column:photo;size:256;"`
+	Price    int    `gorm:"column:price;size:36;not null"`        // 原价
+	Discount int    `gorm:"column:discount;not null;defalut:1.0"` // 折扣
+	Stock    int    `gorm:"column:stock;not null"`                // 库存
+	TypeId   string `gorm:"column:type_id;size:36;not null" json:"type_id"`
+	Status   int    `gorm:"column:status;size:1;not null"`
 	// 描述
 	Description string `gorm:"column:description;size:300;not null"`
 }

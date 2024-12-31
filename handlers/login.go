@@ -71,9 +71,8 @@ func LoginByPass(ctx *gin.Context) {
 	// 返回给用户数据
 	ctx.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.RequestSuccess, token, models.UserInfo{
 		UserId:   userInfo.UserId,
-		Email:    userInfo.Email,
 		UserName: userInfo.UserName,
-		Avatar:   userInfo.Avatar,
+		Role:     userInfo.Role,
 	}))
 }
 
@@ -128,11 +127,10 @@ func LoginByVerfiyCode(ctx *gin.Context) {
 	}
 
 	// 返回给用户数据
-	ctx.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.RequestSuccess, "登录成功", models.UserInfo{
+	ctx.JSON(http.StatusOK, response.NewResult(response.EnmuHttptatus.RequestSuccess, token, models.UserInfo{
 		UserId:   userInfo.UserId,
-		Email:    userInfo.Email,
 		UserName: userInfo.UserName,
-		Avatar:   userInfo.Avatar,
+		Role:     userInfo.Role,
 	}))
 }
 
